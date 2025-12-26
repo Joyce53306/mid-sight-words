@@ -3,39 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sight Words 小超人</title>
+    <title>Mid Class Sight Words</title>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root { --bg-color: #fffcf2; --pink: #ffc2d1; --blue: #bde0fe; }
+        :root { --bg-color: #fffcf2; --pink: #ffc2d1; --blue: #bde0fe; --green: #58cc02; }
         body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
         #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        #start-btn { padding: 20px 50px; font-size: 30px; border-radius: 50px; background: #ffda08; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); font-weight: bold; }
-        #header { font-size: 24px; font-weight: bold; color: #555; }
-        .star-container { font-size: 30px; height: 45px; margin: 10px 0; color: #ffcc00; }
+        #start-btn { padding: 20px 50px; font-size: 30px; border-radius: 50px; background: #ffda08; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        .star-container { font-size: 35px; height: 50px; margin: 10px 0; color: #ffcc00; text-shadow: 1px 1px #888; }
         .button-container { display: flex; justify-content: center; gap: 20px; width: 100%; margin: 20px 0; }
-        .word-btn { width: 140px; height: 140px; border-radius: 50%; border: 6px solid white; font-size: 28px; font-weight: bold; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .word-btn { width: 140px; height: 140px; border-radius: 50%; border: 6px solid white; font-size: 28px; font-weight: bold; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #444; }
         .btn-pink { background-color: var(--pink); }
         .btn-blue { background-color: var(--blue); }
-        .correct-anim { transform: scale(1.1); border-color: #58cc02; border-width: 8px; }
+        .correct-anim { transform: scale(1.1); border-color: var(--green); border-width: 8px; }
         #controls { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
-        .action-btn { padding: 15px 30px; border-radius: 50px; border: 2px solid #ddd; background-color: #fff; font-size: 18px; font-weight: bold; width: 80%; max-width: 300px; cursor: pointer; }
+        .action-btn { padding: 15px 30px; border-radius: 50px; border: 2px solid #ddd; background-color: #fff; font-size: 18px; font-weight: bold; width: 85%; max-width: 320px; cursor: pointer; }
         .record-btn { background-color: #ffd6a5; }
         .recording { background-color: #ff6b6b !important; color: white; animation: pulse 1s infinite; }
         .play-btn { background-color: #c1fba4; }
-        #next-btn { background-color: #58cc02; color: white; font-size: 24px; border: none; margin-top: 10px; display: none; animation: bounce 2s infinite; }
+        #next-btn { background-color: var(--green); color: white; font-size: 24px; border: none; display: none; }
         @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
-        @keyframes bounce { 0%, 20%, 50%, 80%, 100% {transform: translateY(0);} 40% {transform: translateY(-10px);} 60% {transform: translateY(-5px);} }
     </style>
 </head>
 <body>
 
     <div id="start-overlay">
-        <h2 style="margin-bottom: 30px;">Ready?</h2>
+        <h1 style="margin-bottom: 30px;">Ready?</h1>
         <button id="start-btn" onclick="startGame()">點我開始玩！</button>
     </div>
 
-    <div id="header">找到正確的單字！</div>
+    <div id="header" style="font-size:24px; font-weight:bold; color:#555;">找到正確的單字！</div>
     <div class="star-container" id="star-display"></div>
 
     <div class="button-container">
@@ -44,78 +42,77 @@
     </div>
 
     <div id="controls">
-        <button id="audio-btn" class="action-btn" onclick="playTargetWord()">🔈 再聽一次老師唸</button>
+        <button class="action-btn" onclick="playTargetWord()">🔈 再聽一次老師唸</button>
         <button id="record-btn" class="action-btn record-btn" onclick="toggleRecording()">🎤 錄音練習</button>
         <button id="play-record-btn" class="action-btn play-btn" onclick="playRecording()" style="display:none;">▶️ 聽我的聲音</button>
         <button id="next-btn" class="action-btn" onclick="initGame()">🌟 答對了！下一題</button>
     </div>
 
     <script>
+        // 中班單字清單
         const wordList = ["I", "a", "it", "made", "on", "to", "not", "picnic", "in", "the", "see", "that", "how", "are", "you", "here", "go", "by", "will", "can", "was", "like", "so", "says", "have", "goes", "get", "where", "at", "who", "we", "and", "is", "this", "play", "with", "big"];
-        let targetWord = "";
-        let currentOptions = [];
-        let stars = 0;
-        let mediaRecorder;
-        let audioChunks = [];
-        let canClick = true;
+        let targetWord = "", currentOptions = [], stars = 0, mediaRecorder, audioChunks = [], canClick = true;
+        
+        // 載入勝利音效
+        const victoryAudio = new Audio('https://www.myinstants.com/media/sounds/final-fantasy-vii-victory-fanfare-1.mp3');
 
-        function startGame() {
-            document.getElementById('start-overlay').style.display = 'none';
-            initGame();
+        function startGame() { 
+            document.getElementById('start-overlay').style.display = 'none'; 
+            victoryAudio.volume = 0;
+            victoryAudio.play().then(() => { victoryAudio.pause(); victoryAudio.volume = 1; }).catch(() => {});
+            initGame(); 
         }
 
         function initGame() {
             canClick = true;
-            // 重設 UI
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('play-record-btn').style.display = 'none';
             document.getElementById('record-btn').innerText = "🎤 錄音練習";
             document.querySelectorAll('.word-btn').forEach(b => b.classList.remove('correct-anim'));
-            
             const shuffled = [...wordList].sort(() => 0.5 - Math.random());
             currentOptions = [shuffled[0], shuffled[1]];
             targetWord = currentOptions[Math.floor(Math.random() * 2)];
-            
             document.getElementById('btn-left').innerText = currentOptions[0];
             document.getElementById('btn-right').innerText = currentOptions[1];
-            
             updateStars();
             setTimeout(playTargetWord, 500);
         }
 
         function playTargetWord() {
             window.speechSynthesis.cancel(); 
-            const utterance = new SpeechSynthesisUtterance(targetWord);
-            utterance.lang = 'en-US';
-            utterance.rate = 0.7;
-            window.speechSynthesis.speak(utterance);
+            const u = new SpeechSynthesisUtterance(targetWord);
+            u.lang = 'en-US'; u.rate = 0.7; window.speechSynthesis.speak(u);
         }
 
         function checkAnswer(index) {
             if (!canClick) return;
-
             if (currentOptions[index] === targetWord) {
-                canClick = false; // 答對後鎖定按鈕，防止重複點擊
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-                
-                // 視覺回饋
-                const correctBtn = index === 0 ? 'btn-left' : 'btn-right';
-                document.getElementById(correctBtn).classList.add('correct-anim');
-                
+                canClick = false;
                 stars++;
                 updateStars();
                 
-                // 顯示「下一題」按鈕，讓學生有時間錄音
-                document.getElementById('next-btn').style.display = 'block';
-            } else {
-                alert("再聽一次喔！老師唸的是：" + targetWord);
-                playTargetWord();
+                if (stars >= 5) {
+                    confetti({ particleCount: 400, spread: 120, origin: { y: 0.5 } });
+                    victoryAudio.currentTime = 0;
+                    victoryAudio.play();
+                    setTimeout(() => {
+                        alert("🎉 太棒了！集滿五顆星星囉！");
+                        stars = 0;
+                        initGame();
+                    }, 100);
+                } else {
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                    document.getElementById(index === 0 ? 'btn-left' : 'btn-right').classList.add('correct-anim');
+                    document.getElementById('next-btn').style.display = 'block';
+                }
+            } else { 
+                alert("再聽一次喔！是 " + targetWord); 
+                playTargetWord(); 
             }
         }
 
-        function updateStars() {
-            const display = document.getElementById('star-display');
-            display.innerText = stars === 0 ? "加油！" : "⭐".repeat(stars);
+        function updateStars() { 
+            document.getElementById('star-display').innerText = stars === 0 ? "加油！" : "⭐".repeat(stars); 
         }
 
         async function toggleRecording() {
@@ -131,23 +128,18 @@
                     audioChunks = [];
                     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                     mediaRecorder.onstop = () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        const audioUrl = URL.createObjectURL(audioBlob);
-                        window.recordedAudio = new Audio(audioUrl);
+                        const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                        window.recordedAudio = new Audio(URL.createObjectURL(blob));
                         document.getElementById('play-record-btn').style.display = 'block';
                     };
                     mediaRecorder.start();
                     btn.classList.add('recording');
                     btn.innerText = "正在錄音...";
-                } catch (err) {
-                    alert("請點擊網址旁邊的鎖頭圖標，開啟「麥克風」權限喔！");
-                }
+                } catch (err) { alert("請開啟麥克風權限"); }
             }
         }
 
-        function playRecording() {
-            if (window.recordedAudio) window.recordedAudio.play();
-        }
+        function playRecording() { if (window.recordedAudio) window.recordedAudio.play(); }
     </script>
 </body>
 </html>
