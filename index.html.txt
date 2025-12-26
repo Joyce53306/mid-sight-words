@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sight Words 小超人 - 中班上學期全</title>
+
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
+    
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #fffcf2;
+            --primary-pink: #ffc2d1;
+            --primary-blue: #bde0fe;
+            --star-gold: #ffcc00;
+            --success-green: #c1fba4;
+        }
+
+        body {
+            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        #header {
+            position: absolute;
+            top: 20px;
+            font-size: 28px;
+            font-weight: bold;
+            color: #555;
+            text-shadow: 1px 1px 2px white;
+        }
+
+        .star-container {
+            font-size: 35px;
+            margin-bottom: 20px;
+            min-height: 45px;
+            color: var(--star-gold);
+        }
+
+        .button-container {
+            display: flex;
+            gap: 30px;
+        }
+
+        .word-btn {
+            width: 160px;
+            height: 160px;
+            border-radius: 50%;
+            border: 10px solid white;
+            font-size: 34px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background-color 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #444;
+        }
+
+        .word-btn:active {
+            transform: scale(0.9);
+        }
+
+        .btn-pink { background-color: var(--primary-pink); }
+        .btn-blue { background-color: var(--primary-blue); }
+
+        #controls {
+            margin-top: 40px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .action-btn {
+            padding: 12px 25px;
+            border-radius: 30px;
+            border: 3px solid white;
+            background-color: #f1f1f1;
+            font-size: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .record-btn { background-color: #ffd6a5; }
+        .recording { background-color: #ff6b6b; color: white; animation: pulse 1s infinite; }
+        .play-btn { background-color: var(--success-green); }
+
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+
+        .counter {
+            position: absolute;
+            bottom: 20px;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="header">找到正確的單字！</div>
+    
+    <div class="star-container" id="star-display"></div>
+
+    <div class="button-container">
+        <button id="btn-left" class="word-btn btn-pink" onclick="checkAnswer(0)"></button>
+        <button id="btn-right" class="word-btn btn-blue" onclick="checkAnswer(1)"></button>
+    </div>
+
+    <div id="controls">
+        <button class="action-btn" onclick="playTargetWord()">🔈 再聽一次老師唸</button>
+        <div style="display: flex; gap: 10px;">
+            <button id="record-btn" class="action-btn record-btn" onclick="toggleRecording()">🎤 錄音練習</button>
+            <button id="play-record-btn" class="action-btn play-btn" onclick="playRecording()" style="display:none;">▶️ 聽我的聲音</button>
+        </div>
+    </div>
+
+    <div class="counter" id="total-count"></div>
+
+    <script>
+        // 完整的單字清單 ML1-ML10
+        const wordList = [
+            "I", "a", "it", "made", 
+            "on", "to", "not", "picnic", 
+            "in", "the", "see", "that", 
+            "how", "are", "you", "here", 
+            "go", "by", "will", "can",
+            "was", "like", "so", "says",
+            "have", "goes", "get", "where",
+            "at", "who", "we", "and",
+            "is", "this", "play", "with", "big"
+        ];
+
+        let targetWord = "";
+        let currentOptions = [];
+        let stars = 0;
+        let mediaRecorder;
+        let audioChunks = [];
+
+        function initGame() {
+            const shuffled = [...wordList].sort(() => 0.5 - Math.random());
+            currentOptions = [shuffled[0], shuffled[1]];
+            targetWord = currentOptions[Math.floor(Math.random() * 2)];
+            
+            document.getElementById('btn-left').innerText = currentOptions[0];
+            document.getElementById('btn-right').innerText = currentOptions[1];
+            document.getElementById('play-record-btn').style.display = 'none';
+            document.getElementById('total-count').innerText = `全部共 ${wordList.length} 個單字複習中`;
+            
+            setTimeout(playTargetWord, 500);
+        }
+
+        function playTargetWord() {
+            const utterance = new SpeechSynthesisUtterance(targetWord);
+            utterance.lang = 'en-US';
+            utterance.rate = 0.7;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        function checkAnswer(index) {
+            if (currentOptions[index] === targetWord) {
+                confetti({
+                    particleCount: 150,
+                    spread: 80,
+                    origin: { y: 0.6 },
+                    colors: ['#ffb7c5', '#a2d2ff', '#ffda08']
+                });
+                
+                stars++;
+                updateStars();
+                setTimeout(initGame, 2000);
+            } else {
+                if (navigator.vibrate) navigator.vibrate(200);
+                alert("再找找看喔！老師唸的是 " + targetWord);
+            }
+        }
+
+        function updateStars() {
+            const display = document.getElementById('star-display');
+            display.innerText = "⭐".repeat(stars);
+        }
+
+        async function toggleRecording() {
+            const btn = document.getElementById('record-btn');
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                mediaRecorder.stop();
+                btn.classList.remove('recording');
+                btn.innerText = "✅ 錄好了";
+            } else {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const audioUrl = URL.createObjectURL(audioBlob);
+                        window.recordedAudio = new Audio(audioUrl);
+                        document.getElementById('play-record-btn').style.display = 'flex';
+                    };
+                    mediaRecorder.start();
+                    btn.classList.add('recording');
+                    btn.innerText = "正在錄音...";
+                } catch (err) {
+                    alert("請允許麥克風權限來進行錄音喔！");
+                }
+            }
+        }
+
+        function playRecording() {
+            if (window.recordedAudio) window.recordedAudio.play();
+        }
+
+        window.onload = initGame;
+    </script>
+</body>
+</html>
