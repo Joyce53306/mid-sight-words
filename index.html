@@ -2,173 +2,80 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sight Words 小超人 - 中班上學期全</title>
-
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sight Words 小超人</title>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
-    
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        :root {
-            --bg-color: #fffcf2;
-            --primary-pink: #ffc2d1;
-            --primary-blue: #bde0fe;
-            --star-gold: #ffcc00;
-            --success-green: #c1fba4;
-        }
-
-        body {
-            font-family: 'Comic Sans MS', 'Chalkboard SE', 'Microsoft JhengHei', sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-            touch-action: manipulation;
-        }
-
-        #header {
-            position: absolute;
-            top: 20px;
-            font-size: 28px;
-            font-weight: bold;
-            color: #555;
-            text-shadow: 1px 1px 2px white;
-        }
-
-        .star-container {
-            font-size: 35px;
-            margin-bottom: 20px;
-            min-height: 45px;
-            color: var(--star-gold);
-        }
-
-        .button-container {
-            display: flex;
-            gap: 30px;
-        }
-
-        .word-btn {
-            width: 160px;
-            height: 160px;
-            border-radius: 50%;
-            border: 10px solid white;
-            font-size: 34px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            transition: transform 0.1s, background-color 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #444;
-        }
-
-        .word-btn:active {
-            transform: scale(0.9);
-        }
-
-        .btn-pink { background-color: var(--primary-pink); }
-        .btn-blue { background-color: var(--primary-blue); }
-
-        #controls {
-            margin-top: 40px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .action-btn {
-            padding: 12px 25px;
-            border-radius: 30px;
-            border: 3px solid white;
-            background-color: #f1f1f1;
-            font-size: 20px;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
+        :root { --bg-color: #fffcf2; --pink: #ffc2d1; --blue: #bde0fe; }
+        body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
+        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.9); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
+        #start-btn { padding: 20px 50px; font-size: 30px; border-radius: 50px; background: #ffda08; border: none; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+        #header { font-size: 24px; font-weight: bold; color: #555; }
+        .star-container { font-size: 30px; height: 45px; margin: 10px 0; color: #ffcc00; }
+        .button-container { display: flex; justify-content: center; gap: 20px; width: 100%; margin: 20px 0; }
+        .word-btn { width: 140px; height: 140px; border-radius: 50%; border: 6px solid white; font-size: 28px; font-weight: bold; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; }
+        .btn-pink { background-color: var(--pink); }
+        .btn-blue { background-color: var(--blue); }
+        #controls { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
+        .action-btn { padding: 15px 30px; border-radius: 50px; border: 2px solid #ddd; background-color: #fff; font-size: 18px; font-weight: bold; width: 80%; max-width: 300px; }
         .record-btn { background-color: #ffd6a5; }
-        .recording { background-color: #ff6b6b; color: white; animation: pulse 1s infinite; }
-        .play-btn { background-color: var(--success-green); }
-
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-
-        .counter {
-            position: absolute;
-            bottom: 20px;
-            color: #999;
-            font-size: 14px;
-        }
+        .recording { background-color: #ff6b6b !important; color: white; }
+        .play-btn { background-color: #c1fba4; }
     </style>
 </head>
 <body>
 
+    <div id="start-overlay">
+        <h2> तैयार ready? </h2>
+        <button id="start-btn" onclick="startGame()">點我開始玩！</button>
+    </div>
+
     <div id="header">找到正確的單字！</div>
-    
     <div class="star-container" id="star-display"></div>
 
     <div class="button-container">
-        <button id="btn-left" class="word-btn btn-pink" onclick="checkAnswer(0)"></button>
-        <button id="btn-right" class="word-btn btn-blue" onclick="checkAnswer(1)"></button>
+        <button id="btn-left" class="word-btn btn-pink" onclick="checkAnswer(0)">...</button>
+        <button id="btn-right" class="word-btn btn-blue" onclick="checkAnswer(1)">...</button>
     </div>
 
     <div id="controls">
         <button class="action-btn" onclick="playTargetWord()">🔈 再聽一次老師唸</button>
-        <div style="display: flex; gap: 10px;">
-            <button id="record-btn" class="action-btn record-btn" onclick="toggleRecording()">🎤 錄音練習</button>
-            <button id="play-record-btn" class="action-btn play-btn" onclick="playRecording()" style="display:none;">▶️ 聽我的聲音</button>
-        </div>
+        <button id="record-btn" class="action-btn record-btn" onclick="toggleRecording()">🎤 錄音練習</button>
+        <button id="play-record-btn" class="action-btn play-btn" onclick="playRecording()" style="display:none;">▶️ 聽我的聲音</button>
     </div>
 
-    <div class="counter" id="total-count"></div>
-
     <script>
-        // 完整的單字清單 ML1-ML10
-        const wordList = [
-            "I", "a", "it", "made", 
-            "on", "to", "not", "picnic", 
-            "in", "the", "see", "that", 
-            "how", "are", "you", "here", 
-            "go", "by", "will", "can",
-            "was", "like", "so", "says",
-            "have", "goes", "get", "where",
-            "at", "who", "we", "and",
-            "is", "this", "play", "with", "big"
-        ];
-
+        const wordList = ["I", "a", "it", "made", "on", "to", "not", "picnic", "in", "the", "see", "that", "how", "are", "you", "here", "go", "by", "will", "can", "was", "like", "so", "says", "have", "goes", "get", "where", "at", "who", "we", "and", "is", "this", "play", "with", "big"];
         let targetWord = "";
         let currentOptions = [];
         let stars = 0;
         let mediaRecorder;
         let audioChunks = [];
 
+        // 啟動遊戲：透過此點擊動作解鎖語音功能
+        function startGame() {
+            document.getElementById('start-overlay').style.display = 'none';
+            // 嘗試喚醒發音系統
+            const welcome = new SpeechSynthesisUtterance("Let's play");
+            welcome.volume = 0; // 靜音發送，只為了取得權限
+            window.speechSynthesis.speak(welcome);
+            initGame();
+        }
+
         function initGame() {
             const shuffled = [...wordList].sort(() => 0.5 - Math.random());
             currentOptions = [shuffled[0], shuffled[1]];
             targetWord = currentOptions[Math.floor(Math.random() * 2)];
-            
             document.getElementById('btn-left').innerText = currentOptions[0];
             document.getElementById('btn-right').innerText = currentOptions[1];
             document.getElementById('play-record-btn').style.display = 'none';
-            document.getElementById('total-count').innerText = `全部共 ${wordList.length} 個單字複習中`;
-            
+            updateStars();
             setTimeout(playTargetWord, 500);
         }
 
         function playTargetWord() {
+            window.speechSynthesis.cancel(); 
             const utterance = new SpeechSynthesisUtterance(targetWord);
             utterance.lang = 'en-US';
             utterance.rate = 0.7;
@@ -177,25 +84,19 @@
 
         function checkAnswer(index) {
             if (currentOptions[index] === targetWord) {
-                confetti({
-                    particleCount: 150,
-                    spread: 80,
-                    origin: { y: 0.6 },
-                    colors: ['#ffb7c5', '#a2d2ff', '#ffda08']
-                });
-                
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                 stars++;
                 updateStars();
-                setTimeout(initGame, 2000);
+                setTimeout(initGame, 1500);
             } else {
-                if (navigator.vibrate) navigator.vibrate(200);
-                alert("再找找看喔！老師唸的是 " + targetWord);
+                alert("再聽一次喔！老師唸的是：" + targetWord);
+                playTargetWord();
             }
         }
 
         function updateStars() {
             const display = document.getElementById('star-display');
-            display.innerText = "⭐".repeat(stars);
+            display.innerText = stars === 0 ? "加油！" : "⭐".repeat(stars);
         }
 
         async function toggleRecording() {
@@ -214,13 +115,13 @@
                         const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
                         const audioUrl = URL.createObjectURL(audioBlob);
                         window.recordedAudio = new Audio(audioUrl);
-                        document.getElementById('play-record-btn').style.display = 'flex';
+                        document.getElementById('play-record-btn').style.display = 'block';
                     };
                     mediaRecorder.start();
                     btn.classList.add('recording');
                     btn.innerText = "正在錄音...";
                 } catch (err) {
-                    alert("請允許麥克風權限來進行錄音喔！");
+                    alert("請開啟麥克風權限");
                 }
             }
         }
@@ -228,8 +129,6 @@
         function playRecording() {
             if (window.recordedAudio) window.recordedAudio.play();
         }
-
-        window.onload = initGame;
     </script>
 </body>
 </html>
