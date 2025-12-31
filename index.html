@@ -45,15 +45,13 @@
         <button class="action-btn" onclick="playTargetWord()">🔈 再聽一次老師唸</button>
         <button id="record-btn" class="action-btn record-btn" onclick="toggleRecording()">🎤 錄音練習</button>
         <button id="play-record-btn" class="action-btn play-btn" onclick="playRecording()" style="display:none;">▶️ 聽我的聲音</button>
-        <button id="next-btn" class="action-btn" onclick="initGame()">🌟 答對了！下一題</button>
+        <button id="next-btn" class="action-btn" onclick="handleNextStep()">🌟 答對了！下一題</button>
     </div>
 
     <script>
-        // 中班單字清單
         const wordList = ["I", "a", "it", "made", "on", "to", "not", "picnic", "in", "the", "see", "that", "how", "are", "you", "here", "go", "by", "will", "can", "was", "like", "so", "says", "have", "goes", "get", "where", "at", "who", "we", "and", "is", "this", "play", "with", "big"];
         let targetWord = "", currentOptions = [], stars = 0, mediaRecorder, audioChunks = [], canClick = true;
         
-        // 載入勝利音效
         const victoryAudio = new Audio('https://www.myinstants.com/media/sounds/final-fantasy-vii-victory-fanfare-1.mp3');
 
         function startGame() { 
@@ -78,6 +76,24 @@
             setTimeout(playTargetWord, 500);
         }
 
+        // 新增：處理點擊「下一題」的邏輯
+        function handleNextStep() {
+            if (stars >= 5) {
+                // 如果已經滿5星，按下下一題時才慶祝並重置
+                confetti({ particleCount: 400, spread: 120, origin: { y: 0.5 } });
+                victoryAudio.currentTime = 0;
+                victoryAudio.play();
+                setTimeout(() => {
+                    alert("🎉 太棒了！集滿五顆星星囉！");
+                    stars = 0;
+                    initGame();
+                }, 100);
+            } else {
+                // 未滿5星，直接下一題
+                initGame();
+            }
+        }
+
         function playTargetWord() {
             window.speechSynthesis.cancel(); 
             const u = new SpeechSynthesisUtterance(targetWord);
@@ -91,20 +107,11 @@
                 stars++;
                 updateStars();
                 
-                if (stars >= 5) {
-                    confetti({ particleCount: 400, spread: 120, origin: { y: 0.5 } });
-                    victoryAudio.currentTime = 0;
-                    victoryAudio.play();
-                    setTimeout(() => {
-                        alert("🎉 太棒了！集滿五顆星星囉！");
-                        stars = 0;
-                        initGame();
-                    }, 100);
-                } else {
-                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
-                    document.getElementById(index === 0 ? 'btn-left' : 'btn-right').classList.add('correct-anim');
-                    document.getElementById('next-btn').style.display = 'block';
-                }
+                // 無論是不是第5題，都先噴小灑花並顯示按鈕
+                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                document.getElementById(index === 0 ? 'btn-left' : 'btn-right').classList.add('correct-anim');
+                document.getElementById('next-btn').style.display = 'block';
+                
             } else { 
                 alert("再聽一次喔！是 " + targetWord); 
                 playTargetWord(); 
@@ -112,7 +119,7 @@
         }
 
         function updateStars() { 
-            document.getElementById('star-display').innerText = stars === 0 ? "加油！" : "⭐".repeat(stars); 
+            document.getElementById('star-display').innerText = stars === 0 ? "加油！" : "⭐".repeat(Math.min(stars, 5)); 
         }
 
         async function toggleRecording() {
