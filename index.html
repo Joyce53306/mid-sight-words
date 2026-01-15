@@ -12,7 +12,8 @@
         * { -webkit-tap-highlight-color: transparent; }
         
         body { 
-            font-family: 'Itim', cursive, sans-serif; /* 全域套用書寫風格字體 */
+            /* 全域套用書寫風格字體，確保 a 和 g 呈現手寫格式 */
+            font-family: 'Itim', cursive, sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; 
             padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; 
@@ -34,7 +35,7 @@
             padding: 25px 60px; font-size: 32px; border-radius: 60px; 
             background: #ffda08; border: none; cursor: pointer; 
             font-weight: bold; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            font-family: sans-serif; /* 按鈕文字保持清楚 */
+            font-family: 'Itim', cursive; /* 統一風格 */
         }
 
         .star-container { font-size: 40px; height: 60px; margin: 10px 0; color: #ffcc00; }
@@ -43,11 +44,12 @@
         
         .word-btn { 
             width: 150px; height: 150px; border-radius: 50%; border: 8px solid white; 
-            font-size: 38px; /* 加大字體讓書寫體更清楚 */
-            font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            font-size: 42px; /* 再次加大字體，讓 a 和 g 的勾畫更清楚 */
+            font-weight: normal; /* 書寫體通常不建議過粗，以免線條擠在一起 */
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
             display: flex; align-items: center; justify-content: center; color: #444; cursor: pointer;
             transition: transform 0.2s;
-            font-family: 'Itim', cursive; /* 確保單字按鈕使用書寫體 */
+            font-family: 'Itim', cursive;
         }
         
         .btn-pink { background-color: var(--pink); }
@@ -59,7 +61,7 @@
             padding: 18px 30px; border-radius: 50px; border: 2px solid #ddd; 
             background-color: #fff; font-size: 20px; font-weight: bold; 
             width: 90%; max-width: 350px; cursor: pointer;
-            font-family: sans-serif; /* 控制介面用標準字體比較好閱讀 */
+            font-family: 'Itim', cursive;
         }
         .record-btn { background-color: #ffd6a5; }
         .recording { background-color: #ff6b6b !important; color: white; animation: pulse 1s infinite; }
@@ -72,11 +74,11 @@
 <body>
 
     <div id="start-overlay">
-        <h1 style="margin-bottom: 30px; color: #555; font-family: sans-serif;">Sight Words Hero</h1>
+        <h1 style="margin-bottom: 30px; color: #555;">Sight Words Hero</h1>
         <button id="start-btn" onclick="startGame()">點我開始玩！</button>
     </div>
 
-    <div id="header" style="font-size:26px; font-weight:bold; color:#555; margin-top:10px; font-family: sans-serif;">找到正確的單字！</div>
+    <div id="header" style="font-size:26px; font-weight:bold; color:#555; margin-top:10px;">找到正確的單字！</div>
     <div class="star-container" id="star-display"></div>
 
     <div class="button-container">
@@ -92,7 +94,6 @@
     </div>
 
     <script>
-        // ... (這裡保留您之前的 JavaScript 邏輯，包含勝利音樂暫停與跨平台優化)
         const wordList = ["I", "a", "it", "made", "on", "to", "not", "picnic", "in", "the", "see", "that", "how", "are", "you", "here", "go", "by", "will", "can", "was", "like", "so", "says", "have", "goes", "get", "where", "at", "who", "we", "and", "is", "this", "play", "with", "big"];
         let targetWord = "", currentOptions = [], stars = 0, mediaRecorder, audioChunks = [], canClick = true;
         const victoryAudio = new Audio('https://www.myinstants.com/media/sounds/final-fantasy-vii-victory-fanfare-1.mp3');
