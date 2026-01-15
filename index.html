@@ -2,38 +2,74 @@
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mid Class Sight Words</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Mid Class Sight Words Hero</title>
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
         :root { --bg-color: #fffcf2; --pink: #ffc2d1; --blue: #bde0fe; --green: #58cc02; }
-        body { font-family: sans-serif; background-color: var(--bg-color); margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; box-sizing: border-box; }
-        #start-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 100; }
-        #start-btn { padding: 20px 50px; font-size: 30px; border-radius: 50px; background: #ffda08; border: none; cursor: pointer; font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .star-container { font-size: 35px; height: 50px; margin: 10px 0; color: #ffcc00; text-shadow: 1px 1px #888; }
-        .button-container { display: flex; justify-content: center; gap: 20px; width: 100%; margin: 20px 0; }
-        .word-btn { width: 140px; height: 140px; border-radius: 50%; border: 6px solid white; font-size: 28px; font-weight: bold; box-shadow: 0 8px 15px rgba(0,0,0,0.1); display: flex; align-items: center; justify-content: center; color: #444; }
+        * { -webkit-tap-highlight-color: transparent; } /* 移除手機點擊藍色框 */
+        
+        body { 
+            font-family: sans-serif; 
+            background-color: var(--bg-color); 
+            margin: 0; 
+            padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            min-height: 100vh; 
+            box-sizing: border-box; 
+            overflow: hidden; /* 防止在平板上晃動 */
+        }
+
+        #start-overlay { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: rgba(255,255,255,0.98); 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+            z-index: 100; 
+        }
+        #start-btn { 
+            padding: 25px 60px; font-size: 32px; border-radius: 60px; 
+            background: #ffda08; border: none; cursor: pointer; 
+            font-weight: bold; box-shadow: 0 8px 20px rgba(0,0,0,0.15); 
+        }
+
+        .star-container { font-size: 40px; height: 60px; margin: 10px 0; color: #ffcc00; }
+        
+        .button-container { display: flex; justify-content: center; gap: 30px; width: 100%; margin: 15px 0; }
+        .word-btn { 
+            width: 150px; height: 150px; border-radius: 50%; border: 8px solid white; 
+            font-size: 30px; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
+            display: flex; align-items: center; justify-content: center; color: #444; cursor: pointer;
+            transition: transform 0.2s;
+        }
         .btn-pink { background-color: var(--pink); }
         .btn-blue { background-color: var(--blue); }
-        .correct-anim { transform: scale(1.1); border-color: var(--green); border-width: 8px; }
-        #controls { display: flex; flex-direction: column; align-items: center; gap: 15px; width: 100%; }
-        .action-btn { padding: 15px 30px; border-radius: 50px; border: 2px solid #ddd; background-color: #fff; font-size: 18px; font-weight: bold; width: 85%; max-width: 320px; cursor: pointer; }
+        .correct-anim { transform: scale(1.1); border-color: var(--green); }
+
+        #controls { display: flex; flex-direction: column; align-items: center; gap: 12px; width: 100%; }
+        .action-btn { 
+            padding: 18px 30px; border-radius: 50px; border: 2px solid #ddd; 
+            background-color: #fff; font-size: 20px; font-weight: bold; 
+            width: 90%; max-width: 350px; cursor: pointer; 
+        }
         .record-btn { background-color: #ffd6a5; }
         .recording { background-color: #ff6b6b !important; color: white; animation: pulse 1s infinite; }
-        .play-btn { background-color: #c1fba4; }
-        #next-btn { background-color: var(--green); color: white; font-size: 24px; border: none; display: none; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+        .play-btn { background-color: #c1fba4; border-color: #A2D5AB; }
+        #next-btn { background-color: var(--green); color: white; font-size: 26px; border: none; display: none; margin-top: 5px; }
+
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
     </style>
 </head>
 <body>
 
     <div id="start-overlay">
-        <h1 style="margin-bottom: 30px;">Ready?</h1>
+        <h1 style="margin-bottom: 30px; color: #555;">Sight Words Hero</h1>
         <button id="start-btn" onclick="startGame()">點我開始玩！</button>
     </div>
 
-    <div id="header" style="font-size:24px; font-weight:bold; color:#555;">找到正確的單字！</div>
+    <div id="header" style="font-size:26px; font-weight:bold; color:#555; margin-top:10px;">找到正確的單字！</div>
     <div class="star-container" id="star-display"></div>
 
     <div class="button-container">
@@ -56,40 +92,50 @@
 
         function startGame() { 
             document.getElementById('start-overlay').style.display = 'none'; 
-            victoryAudio.volume = 0;
-            victoryAudio.play().then(() => { victoryAudio.pause(); victoryAudio.volume = 1; }).catch(() => {});
+            // 解決 iOS 音訊鎖定問題：在使用者點擊時播放靜音
+            victoryAudio.play().then(() => { 
+                victoryAudio.pause(); 
+                victoryAudio.currentTime = 0;
+            }).catch(() => {});
+            
+            // 預熱語音合成
+            window.speechSynthesis.cancel();
+            const initialUtterance = new SpeechSynthesisUtterance("");
+            window.speechSynthesis.speak(initialUtterance);
+
             initGame(); 
         }
 
         function initGame() {
             canClick = true;
+            // 停止並重置勝利音樂
+            victoryAudio.pause();
+            victoryAudio.currentTime = 0;
+
             document.getElementById('next-btn').style.display = 'none';
             document.getElementById('play-record-btn').style.display = 'none';
             document.getElementById('record-btn').innerText = "🎤 錄音練習";
             document.querySelectorAll('.word-btn').forEach(b => b.classList.remove('correct-anim'));
+            
             const shuffled = [...wordList].sort(() => 0.5 - Math.random());
             currentOptions = [shuffled[0], shuffled[1]];
             targetWord = currentOptions[Math.floor(Math.random() * 2)];
+            
             document.getElementById('btn-left').innerText = currentOptions[0];
             document.getElementById('btn-right').innerText = currentOptions[1];
             updateStars();
             setTimeout(playTargetWord, 500);
         }
 
-        // 新增：處理點擊「下一題」的邏輯
         function handleNextStep() {
+            // 在切換下一題前，確保音樂停止
+            victoryAudio.pause();
+            victoryAudio.currentTime = 0;
+
             if (stars >= 5) {
-                // 如果已經滿5星，按下下一題時才慶祝並重置
-                confetti({ particleCount: 400, spread: 120, origin: { y: 0.5 } });
-                victoryAudio.currentTime = 0;
-                victoryAudio.play();
-                setTimeout(() => {
-                    alert("🎉 太棒了！集滿五顆星星囉！");
-                    stars = 0;
-                    initGame();
-                }, 100);
+                stars = 0;
+                initGame();
             } else {
-                // 未滿5星，直接下一題
                 initGame();
             }
         }
@@ -97,7 +143,8 @@
         function playTargetWord() {
             window.speechSynthesis.cancel(); 
             const u = new SpeechSynthesisUtterance(targetWord);
-            u.lang = 'en-US'; u.rate = 0.7; window.speechSynthesis.speak(u);
+            u.lang = 'en-US'; u.rate = 0.7; 
+            window.speechSynthesis.speak(u);
         }
 
         function checkAnswer(index) {
@@ -107,10 +154,19 @@
                 stars++;
                 updateStars();
                 
-                // 無論是不是第5題，都先噴小灑花並顯示按鈕
-                confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
                 document.getElementById(index === 0 ? 'btn-left' : 'btn-right').classList.add('correct-anim');
                 document.getElementById('next-btn').style.display = 'block';
+
+                if (stars >= 5) {
+                    // 第五題答對：噴花 + 音樂
+                    confetti({ particleCount: 400, spread: 120, origin: { y: 0.5 } });
+                    victoryAudio.play().catch(e => console.log("Audio play failed", e));
+                    document.getElementById('next-btn').innerText = "🎉 挑戰成功！再玩一次";
+                } else {
+                    // 普通答對：小噴花
+                    confetti({ particleCount: 150, spread: 80, origin: { y: 0.6 } });
+                    document.getElementById('next-btn').innerText = "🌟 答對了！下一題";
+                }
                 
             } else { 
                 alert("再聽一次喔！是 " + targetWord); 
@@ -131,11 +187,18 @@
             } else {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    mediaRecorder = new MediaRecorder(stream);
+                    
+                    // 針對 iOS 調整格式
+                    let options = { mimeType: 'audio/mp4' };
+                    if (!MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options = { mimeType: 'audio/webm' };
+                    }
+
+                    mediaRecorder = new MediaRecorder(stream, options);
                     audioChunks = [];
                     mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
                     mediaRecorder.onstop = () => {
-                        const blob = new Blob(audioChunks, { type: 'audio/wav' });
+                        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                         window.recordedAudio = new Audio(URL.createObjectURL(blob));
                         document.getElementById('play-record-btn').style.display = 'block';
                     };
@@ -146,7 +209,11 @@
             }
         }
 
-        function playRecording() { if (window.recordedAudio) window.recordedAudio.play(); }
+        function playRecording() { 
+            if (window.recordedAudio) {
+                window.recordedAudio.play();
+            } 
+        }
     </script>
 </body>
 </html>
