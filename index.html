@@ -4,16 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Mid Class Sight Words Hero</title>
-    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Andika&display=swap" rel="stylesheet">
+    
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3406/3406828.png">
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    
     <style>
         :root { --bg-color: #fffcf2; --pink: #ffc2d1; --blue: #bde0fe; --green: #58cc02; }
         * { -webkit-tap-highlight-color: transparent; }
         
         body { 
-            /* 全域套用書寫風格字體，確保 a 和 g 呈現手寫格式 */
-            font-family: 'Itim', cursive, sans-serif; 
+            /* 2. 全域套用 Andika 字體 */
+            font-family: 'Andika', sans-serif; 
             background-color: var(--bg-color); 
             margin: 0; 
             padding: env(safe-area-inset-top) 20px env(safe-area-inset-bottom) 20px; 
@@ -35,7 +40,7 @@
             padding: 25px 60px; font-size: 32px; border-radius: 60px; 
             background: #ffda08; border: none; cursor: pointer; 
             font-weight: bold; box-shadow: 0 8px 20px rgba(0,0,0,0.15);
-            font-family: 'Itim', cursive; /* 統一風格 */
+            font-family: 'Andika', sans-serif; /* 確保按鈕也是正確字體 */
         }
 
         .star-container { font-size: 40px; height: 60px; margin: 10px 0; color: #ffcc00; }
@@ -44,12 +49,12 @@
         
         .word-btn { 
             width: 150px; height: 150px; border-radius: 50%; border: 8px solid white; 
-            font-size: 42px; /* 再次加大字體，讓 a 和 g 的勾畫更清楚 */
-            font-weight: normal; /* 書寫體通常不建議過粗，以免線條擠在一起 */
+            font-size: 42px; 
+            font-weight: normal; 
             box-shadow: 0 10px 20px rgba(0,0,0,0.1); 
             display: flex; align-items: center; justify-content: center; color: #444; cursor: pointer;
             transition: transform 0.2s;
-            font-family: 'Itim', cursive;
+            font-family: 'Andika', sans-serif;
         }
         
         .btn-pink { background-color: var(--pink); }
@@ -61,7 +66,7 @@
             padding: 18px 30px; border-radius: 50px; border: 2px solid #ddd; 
             background-color: #fff; font-size: 20px; font-weight: bold; 
             width: 90%; max-width: 350px; cursor: pointer;
-            font-family: 'Itim', cursive;
+            font-family: 'Andika', sans-serif;
         }
         .record-btn { background-color: #ffd6a5; }
         .recording { background-color: #ff6b6b !important; color: white; animation: pulse 1s infinite; }
@@ -96,14 +101,21 @@
     <script>
         const wordList = ["I", "a", "it", "made", "on", "to", "not", "picnic", "in", "the", "see", "that", "how", "are", "you", "here", "go", "by", "will", "can", "was", "like", "so", "says", "have", "goes", "get", "where", "at", "who", "we", "and", "is", "this", "play", "with", "big"];
         let targetWord = "", currentOptions = [], stars = 0, mediaRecorder, audioChunks = [], canClick = true;
+        
+        // 音效設定
         const victoryAudio = new Audio('https://www.myinstants.com/media/sounds/final-fantasy-vii-victory-fanfare-1.mp3');
+        victoryAudio.preload = 'auto';
 
         function startGame() { 
+            // 隱藏開始畫面
             document.getElementById('start-overlay').style.display = 'none'; 
+            
+            // iOS 重要步驟：在使用者第一次點擊時「解鎖」音效播放權限
             victoryAudio.play().then(() => { 
                 victoryAudio.pause(); 
                 victoryAudio.currentTime = 0;
             }).catch(() => {});
+            
             window.speechSynthesis.cancel();
             initGame(); 
         }
@@ -116,12 +128,15 @@
             document.getElementById('play-record-btn').style.display = 'none';
             document.getElementById('record-btn').innerText = "🎤 錄音練習";
             document.querySelectorAll('.word-btn').forEach(b => b.classList.remove('correct-anim'));
+            
             const shuffled = [...wordList].sort(() => 0.5 - Math.random());
             currentOptions = [shuffled[0], shuffled[1]];
             targetWord = currentOptions[Math.floor(Math.random() * 2)];
+            
             document.getElementById('btn-left').innerText = currentOptions[0];
             document.getElementById('btn-right').innerText = currentOptions[1];
             updateStars();
+            
             setTimeout(playTargetWord, 500);
         }
 
@@ -165,8 +180,10 @@
             document.getElementById('star-display').innerText = stars === 0 ? "加油！" : "⭐".repeat(Math.min(stars, 5)); 
         }
 
+        // --- iOS 錄音優化區塊 ---
         async function toggleRecording() {
             const btn = document.getElementById('record-btn');
+            
             if (mediaRecorder && mediaRecorder.state === "recording") {
                 mediaRecorder.stop();
                 btn.classList.remove('recording');
@@ -174,24 +191,43 @@
             } else {
                 try {
                     const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-                    let options = { mimeType: 'audio/mp4' };
-                    if (!MediaRecorder.isTypeSupported('audio/mp4')) options = { mimeType: 'audio/webm' };
+                    
+                    // 偵測：優先使用 mp4 (iOS)，否則使用 webm (Android)
+                    let options = { mimeType: 'audio/webm' };
+                    if (MediaRecorder.isTypeSupported('audio/mp4')) {
+                        options = { mimeType: 'audio/mp4' };
+                    }
+                    
                     mediaRecorder = new MediaRecorder(stream, options);
                     audioChunks = [];
-                    mediaRecorder.ondataavailable = e => audioChunks.push(e.data);
+                    
+                    mediaRecorder.ondataavailable = e => {
+                        if (e.data.size > 0) audioChunks.push(e.data);
+                    };
+                    
                     mediaRecorder.onstop = () => {
+                        // 使用正確的 MIME type 建立 Blob，確保 iOS 可播放
                         const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType });
                         window.recordedAudio = new Audio(URL.createObjectURL(blob));
                         document.getElementById('play-record-btn').style.display = 'block';
                     };
+                    
                     mediaRecorder.start();
                     btn.classList.add('recording');
                     btn.innerText = "正在錄音...";
-                } catch (err) { alert("請開啟麥克風權限"); }
+                    
+                } catch (err) { 
+                    console.error(err);
+                    alert("無法存取麥克風，請確認：\n1. 使用 Safari 開啟\n2. 網址開頭為 HTTPS"); 
+                }
             }
         }
 
-        function playRecording() { if (window.recordedAudio) window.recordedAudio.play(); }
+        function playRecording() { 
+            if (window.recordedAudio) {
+                window.recordedAudio.play().catch(e => alert("播放失敗，請確認非靜音模式"));
+            }
+        }
     </script>
 </body>
 </html>
